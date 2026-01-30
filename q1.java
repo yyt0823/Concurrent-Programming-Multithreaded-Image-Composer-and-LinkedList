@@ -75,15 +75,13 @@ public class q1 {
 
         // demonstrate copying an icon into the output image.
         // this is not the only way to read or modify image pixels, but it is a starting point
-        for (int i=0;i<icons[0].getWidth();i++) {
-            for (int j=0;j<icons[0].getHeight();j++) {
-                outputimage.setRGB(i,j,icons[0].getRGB(i,j));
-            }
-        }
+        
+
+        imgout = outputimage;
 
         // Write out the image
         File outputfile = new File("outputimage.png");
-        ImageIO.write(outputimage, "png", outputfile);
+        
 
         //test
         worker worker = new worker();
@@ -91,6 +89,8 @@ public class q1 {
             Thread thread = new Thread(worker);
             thread.start();
         }
+
+        ImageIO.write(imgout, "png", outputfile);
 
     }
 
@@ -118,6 +118,41 @@ public class q1 {
             // pick a random icon
             int icon = random.nextInt(ICONS);
             System.out.println("Picked icon: " + icon);
+
+            // get the width and height of the icon
+            int width = icons[icon].getWidth();
+            int height = icons[icon].getHeight();
+            System.out.println("Width: " + width + ", Height: " + height);
+
+            // pick a random position
+            int x = random.nextInt(outputwidth);
+            int y = random.nextInt(outputheight);
+            System.out.println("Picked position: " + x + ", " + y);
+
+            // stay inside the boundary
+            if (x + width > outputwidth || y + height > outputheight) {
+                System.out.println("Icon does not fit at position: " + x + ", " + y);
+                return;
+            }
+
+            // varify the icon
+            for (int i = 0; i < width; i++) {
+                for (int j = 0; j < height; j++) {
+                    if (imgout.getRGB(x + i, y + j) != 0) {
+                        System.out.println("pixel already exists at position: " + x + ", " + y);
+                        return;
+                    }
+                }
+            } 
+
+            // add the icon to the output image
+            for (int i = 0; i < width; i++) {
+                for (int j = 0; j < height; j++) {
+                    imgout.setRGB(x + i, y + j,
+                                  icons[icon].getRGB(i, j));
+                }
+            }
+
         }
     }
 
