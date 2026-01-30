@@ -1,6 +1,8 @@
 import java.awt.image.*;
 import java.io.*;
 import javax.imageio.*;
+import java.util.concurrent.ThreadLocalRandom;
+
 
 public class q1 {
     
@@ -82,5 +84,42 @@ public class q1 {
         // Write out the image
         File outputfile = new File("outputimage.png");
         ImageIO.write(outputimage, "png", outputfile);
+
+        //test
+        worker worker = new worker();
+        for (int i = 0; i < threads; i++) {
+            Thread thread = new Thread(worker);
+            thread.start();
+        }
+
     }
+
+
+
+
+    // idea: we are tring to access the same outputimage thus this should be our shared memory object
+    // for each thread:
+    // 1. select a random icon
+    // 2. select a random position 
+    // 3. varify the icon --add with no overlap  --replace an existing icon
+    // 4. execute or give up and go back to step 1
+
+    // for each thread if it is doing its work --> in C.S. --> take the lock
+
+    // for timing use System.currentTimeMillis() and output the time, plot time vs t
+
+
+    // here first we make a runnable class
+    public static class worker implements Runnable {
+        @Override
+        public void run() {
+            // here we use the thread local random instead of the Random class
+            ThreadLocalRandom random = ThreadLocalRandom.current();
+            // pick a random icon
+            int icon = random.nextInt(ICONS);
+            System.out.println("Picked icon: " + icon);
+        }
+    }
+
+
 }
