@@ -60,7 +60,7 @@ public class q1 {
     }
 
     // main.  we allow an IOException in case the image loading/storing fails.
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, InterruptedException {
         // process options
         opts(args);
 
@@ -82,15 +82,23 @@ public class q1 {
         // Write out the image
         File outputfile = new File("outputimage.png");
         
-
+        // set timer
+        long startTime = System.currentTimeMillis();
         //test
-        worker worker = new worker();
+        Thread[] ts = new Thread[threads];
+        
         for (int i = 0; i < threads; i++) {
-            Thread thread = new Thread(worker);
-            thread.start();
+            ts[i] = new Thread(new worker());
+            ts[i].start();
+        }
+
+        for (int i = 0; i < threads; i++) {
+            ts[i].join();
         }
 
         ImageIO.write(imgout, "png", outputfile);
+        
+        System.out.println("Time taken: " + (System.currentTimeMillis() - startTime) + " milliseconds");
 
     }
 
