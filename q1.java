@@ -15,6 +15,12 @@ public class q1 {
     public static int n = 100; // icons added/changed
     public static final int ICONS = 8; // total number of icons
 
+    // locks 
+    static final Object IMG_LOCK = new Object();
+    static final Object COUNT_LOCK = new Object();
+    
+
+
     // icons image
     public static BufferedImage[] icons = new BufferedImage[ICONS];
 
@@ -98,7 +104,7 @@ public class q1 {
 
         ImageIO.write(imgout, "png", outputfile);
         
-        System.out.println("Time taken: " + (System.currentTimeMillis() - startTime) + " milliseconds");
+        System.out.println(System.currentTimeMillis() - startTime);
 
     }
 
@@ -124,40 +130,66 @@ public class q1 {
             // here we use the thread local random instead of the Random class
             ThreadLocalRandom random = ThreadLocalRandom.current();
             // pick a random icon
-            int icon = random.nextInt(ICONS);
-            System.out.println("Picked icon: " + icon);
+            while (true) {
+                int icon = random.nextInt(ICONS);
 
-            // get the width and height of the icon
-            int width = icons[icon].getWidth();
-            int height = icons[icon].getHeight();
-            System.out.println("Width: " + width + ", Height: " + height);
+                // get the width and height of the icon
+                int width = icons[icon].getWidth();
+                int height = icons[icon].getHeight();
 
-            // pick a random position
-            int x = random.nextInt(outputwidth);
-            int y = random.nextInt(outputheight);
-            System.out.println("Picked position: " + x + ", " + y);
 
-            // stay inside the boundary
-            if (x + width > outputwidth || y + height > outputheight) {
-                System.out.println("Icon does not fit at position: " + x + ", " + y);
-                return;
-            }
+                // pick a random position in side of the boundary
+                int x = random.nextInt(outputwidth - width + 1);
+                int y = random.nextInt(outputheight - height + 1);
 
-            // varify the icon
-            for (int i = 0; i < width; i++) {
-                for (int j = 0; j < height; j++) {
-                    if (imgout.getRGB(x + i, y + j) != 0) {
-                        System.out.println("pixel already exists at position: " + x + ", " + y);
-                        return;
+
+
+
+                synchronized (IMG_LOCK) {
+                // varify the icon
+                    boolean posvalid = true;
+
+                    // check only the boundary of the icon area
+                    for (int i = 0; i < width && posvalid; i++) {
+                        if (imgout.getRGB(x + i, y) != 0) {
+                            posvalid = false;
+                            break;
+                        }
+                        if (imgout.getRGB(x + i, y + height - 1) != 0) {
+                            posvalid = false;
+                            break;
+                        }
+                    }
+                    for (int j = 1; j < height - 1 && posvalid; j++) {
+                        if (imgout.getRGB(x, y + j) != 0) {
+                            posvalid = false;
+                            break;
+                        }
+                        if (imgout.getRGB(x + width - 1, y + j) != 0) {
+                            posvalid = false;
+                            break;
+                        }
+                    }
+
+                    if (!posvalid) {
+                        continue;
+                    }
+
+                    // add the icon to the output image
+                    for (int i = 0; i < width; i++) {
+                        for (int j = 0; j < height; j++) {
+                            int iconPixel = icons[icon].getRGB(i, j);
+                            if (iconPixel != 0) {
+                                imgout.setRGB(x + i, y + j, iconPixel);
+                            }
+                        }
                     }
                 }
-            } 
 
-            // add the icon to the output image
-            for (int i = 0; i < width; i++) {
-                for (int j = 0; j < height; j++) {
-                    imgout.setRGB(x + i, y + j,
-                                  icons[icon].getRGB(i, j));
+                synchronized (COUNT_LOCK) {
+                    if (n <= 0) return;
+                    n--;
+                    if (n <= 0) return;
                 }
             }
 
