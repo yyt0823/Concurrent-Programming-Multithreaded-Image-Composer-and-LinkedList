@@ -32,21 +32,6 @@ public class q1 {
         tilelocks = new Object[tileCols * tileRows];
         for (int i = 0; i < tilelocks.length; i++) tilelocks[i] = new Object();
     }
-    // deprecated
-    // static int singleTileIndexOrMinus1(int x, int y, int w, int h) {
-    //     if (x < 0 || y < 0 || x + w > outputwidth || y + h > outputheight) return -1;
-    
-    //     int tx0 = Math.min((x) / tileW, tileCols - 1);
-    //     int ty0 = Math.min((y) / tileH, tileRows - 1);
-    //     int tx1 = Math.min((x + w - 1) / tileW, tileCols - 1);
-    //     int ty1 = Math.min((y + h - 1) / tileH, tileRows - 1);
-    
-    //     if (tx0 != tx1 || ty0 != ty1) return -1; // crosses tile boundary
-    //     return ty0 * tileCols + tx0;
-    // }
-
-
-
 
 
     // icons image
@@ -189,13 +174,11 @@ public class q1 {
                     int maxX = Math.min(left + tileW - width,  outputwidth - width);
                     int maxY = Math.min(top  + tileH - height, outputheight - height);
 
-                    // if the icon can't fit in this tile, continue
-                    if (maxX < left || maxY < top) continue; 
-
+                    // get the random x and y of the icon in the tile
                     int x = left + random.nextInt(maxX - left + 1);
                     int y = top  + random.nextInt(maxY - top  + 1);
 
-                    int idx = ty * tileCols + tx; // guaranteed single tile
+                    int idx = ty * tileCols + tx; 
                     if (idx == -1) {
                         System.err.println("idx is -1");
                         continue;
@@ -204,7 +187,7 @@ public class q1 {
 
                     synchronized (tilelocks[idx]) {
                         // System.err.println(idx);
-                        // // varify the icons
+                        // use a rectangle boundary check to validate the position
                         boolean posvalid = true;
                         // top & bottom edges
                         for (int i = 0; i < width && posvalid; i++) {
