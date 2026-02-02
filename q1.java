@@ -103,11 +103,11 @@ public class q1 {
         
         // init tile locks
         initTileLocks();
-
-
+       
         // set timer
         long startTime = System.currentTimeMillis();
-        //test
+        
+        // multiple threading 
         Thread[] ts = new Thread[threads];
         
         for (int i = 0; i < threads; i++) {
