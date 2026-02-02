@@ -15,11 +15,10 @@ public class q1 {
     public static int n = 100; // icons added/changed
     public static final int ICONS = 8; // total number of icons
 
-    // locks not working deprecated
-    // static final Object IMG_LOCK = new Object();
+    // count lock
     static final Object COUNT_LOCK = new Object();
     
-    // tile lock
+    // tile locks
     static Object[] tilelocks;
     static final int tileCols = 16;
     static final int tileRows = 16;
@@ -134,7 +133,7 @@ public class q1 {
     // for each thread:
     // 1. select a random icon
     // 2. select a random position 
-    // 3. varify the icon --add with no overlap  --replace an existing icon
+    // 3. varify the position --add with no overlap  --replace an existing icon
     // 4. execute or give up and go back to step 1
 
     // for each thread if it is doing its work --> in C.S. --> take the lock
@@ -183,8 +182,15 @@ public class q1 {
                         System.err.println("idx is -1");
                         continue;
                     }
+                    // above procedure allow us to find a random position in the tile in one run by construction. 
+                    // will lose some randomness tho, but very good speed up.
 
+                
 
+                    // here for each thread working on its own tile, we want this to be a critical section
+                    // want check position validation to be atomic
+                    // want drawing to be atomic 
+                    // otherwise could have ti, tj doing position validation and get true for both and drawing might overlap
                     synchronized (tilelocks[idx]) {
                         // System.err.println(idx);
                         // use a rectangle boundary check to validate the position
