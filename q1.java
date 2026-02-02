@@ -188,9 +188,10 @@ public class q1 {
                 
 
                     // here for each thread working on its own tile, we want this to be a critical section
-                    // want check position validation to be atomic
+                    // want position validation to be atomic
                     // want drawing to be atomic 
                     // otherwise could have ti, tj doing position validation and get true for both and drawing might overlap
+                    // thus lock both of these in the same lock despite it might be quite big.
                     synchronized (tilelocks[idx]) {
                         // System.err.println(idx);
                         // use a rectangle boundary check to validate the position
