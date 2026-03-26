@@ -4,7 +4,7 @@
 
 ---
 
-## Q1 — Parallel Icon Compositor
+## Parallel Icon Compositor
 
 Randomly places **n icons** onto a 2048×2048 canvas using multiple threads, with no overlapping icons allowed.
 
@@ -43,7 +43,7 @@ java q1 -w 2048 -h 2048 -t 8 -n 100
 
 ---
 
-## Q2 — Concurrent Circular Linked List
+## Concurrent Circular Linked List
 
 Three threads operate simultaneously on a **circular linked list** seeded with A → B → C for 5 seconds.
 
@@ -72,6 +72,6 @@ Three threads operate simultaneously on a **circular linked list** seeded with A
 |------|-------------|
 | `q1.java` | Multithreaded icon compositor |
 | `q2.java` | Concurrent circular linked list |
-| `icon1–8.png` | Input icons for Q1 |
-| `outputimage.png` | Sample render from Q1 |
+| `icon1–8.png` | Input icons for the compositor |
+| `outputimage.png` | Sample render from the compositor |
 | `assig1.pdf` | Assignment specification |
