@@ -1,23 +1,29 @@
-# COMP409 — Assignment 1: Concurrent Programming in Java
+# Concurrent Programming — Multithreaded Image Composer & Linked List
 
-Two concurrency exercises exploring multi-threading, synchronization, and lock design in Java.
+**McGill COMP409** — Two concurrency exercises in Java exploring lock design, atomicity, and thread visibility.
+
+> **Skills:** Java · Multithreading · Synchronized blocks · Volatile · ThreadLocalRandom · Race condition analysis · Lock granularity optimization
 
 ---
 
-## Q1 — Parallel Icon Compositor (`q1.java`)
+## Q1 — Parallel Icon Compositor
 
-Randomly places **n icons** onto a 2048×2048 canvas using multiple threads, ensuring no two icons overlap.
+Randomly places **n icons** onto a 2048×2048 canvas using multiple threads, with no overlapping icons allowed.
+
+### Output
+
+![Output image](outputimage.png)
+
+*Icons placed concurrently by 8 threads onto a 2048×2048 canvas*
 
 ### Approach
-- The output image is divided into a **16×16 grid of tiles**, each protected by its own lock
-- Each worker thread repeatedly: picks a random icon → picks a random tile → validates the position (boundary check) → draws the icon — all within the tile's lock
-- A shared counter (protected by `COUNT_LOCK`) tracks remaining placements; threads exit when it reaches 0
-- Uses `ThreadLocalRandom` for thread-safe, high-performance random number generation
+- Canvas split into a **16×16 tile grid** — each tile has its own lock, so threads on different tiles run fully in parallel
+- Each worker: picks a random icon → picks a random tile → **atomically** validates position + draws — all within the tile lock
+- A shared counter (`COUNT_LOCK`) tracks remaining placements; threads exit when it reaches 0
+- `ThreadLocalRandom` used for thread-safe, contention-free random number generation
 
-### Key Design Decisions
-- **Tile-based locking** over a single global lock: threads working on different tiles run fully in parallel
-- Position validation and drawing are **atomic within the tile lock** to prevent overlapping icons from two threads passing validation simultaneously
-- Icons are constrained to stay within their assigned tile, trading a small amount of placement randomness for a large speedup
+### Why tile-based locking?
+A single global lock would serialize all threads. Fine-grained tile locks allow **true parallelism** — the only contention is when two threads happen to target the same tile simultaneously.
 
 ### Usage
 ```bash
@@ -31,27 +37,34 @@ java q1 -w 2048 -h 2048 -t 8 -n 100
 | `-t` | Number of threads | 8 |
 | `-n` | Number of icons to place | 100 |
 
+### Icons
+| | | | |
+|---|---|---|---|
+| ![icon1](icon1.png) | ![icon2](icon2.png) | ![icon3](icon3.png) | ![icon4](icon4.png) |
+| ![icon5](icon5.png) | ![icon6](icon6.png) | ![icon7](icon7.png) | ![icon8](icon8.png) |
+
 ---
 
-## Q2 — Concurrent Circular Linked List (`q2.java`)
+## Q2 — Concurrent Circular Linked List
 
-Three threads operate simultaneously on a **circular linked list** seeded with nodes A → B → C for 5 seconds.
+Three threads operate simultaneously on a **circular linked list** seeded with A → B → C for 5 seconds.
 
 | Thread | Role | Behavior |
 |--------|------|----------|
-| `worker0` | Reader | Traverses the list, printing each character every 100ms |
-| `worker1` | Deleter | 10% chance per step to remove the current node (never removes A/B/C) |
-| `worker2` | Inserter | 10% chance per step to insert a random non-ABC character after current node |
+| `worker0` | Reader | Traverses the list, printing each node every 100ms |
+| `worker1` | Deleter | 10% chance per step to remove current node (never A/B/C) |
+| `worker2` | Inserter | 10% chance per step to insert a random non-ABC node |
 
 ### Key Design Decisions
-- `Node.next` is declared **`volatile`** so that insertions/deletions by one thread are immediately visible to all others without requiring full synchronization
-- A/B/C nodes are marked `protectedABC = true` and are never deleted, guaranteeing the list always has at least 3 nodes
-- The `running` flag is also `volatile` to ensure threads see the main thread's stop signal promptly after 5 seconds
+- `Node.next` is **`volatile`** — insertions/deletions are immediately visible across threads without full synchronization
+- A/B/C nodes are marked `protectedABC = true` and never deleted — list always has ≥ 3 nodes
+- `running` flag is **`volatile`** — main thread's stop signal is seen immediately by all workers
 
-### Known Race Conditions (by design)
-The assignment intentionally leaves some races unguarded to illustrate their effects:
-- **Lost insert**: deleter unlinks a node at the same moment an inserter links into it
-- **Lost delete**: inserter sets `current.next` after deleter already bypassed it
+### Intentional Race Conditions (for analysis)
+| Race | Scenario |
+|------|----------|
+| Lost insert | Deleter unlinks a node while inserter is linking into it |
+| Lost delete | Inserter sets `current.next` after deleter has already bypassed it |
 
 ---
 
@@ -59,9 +72,8 @@ The assignment intentionally leaves some races unguarded to illustrate their eff
 
 | File | Description |
 |------|-------------|
-| `q1.java` | Multi-threaded icon compositor |
+| `q1.java` | Multithreaded icon compositor |
 | `q2.java` | Concurrent circular linked list |
-| `icon1-8.png` | Input icons for Q1 |
-| `outputimage.png` | Sample output from Q1 |
+| `icon1–8.png` | Input icons for Q1 |
+| `outputimage.png` | Sample render from Q1 |
 | `assig1.pdf` | Assignment specification |
-| `declaration.txt` | Academic integrity declaration |
