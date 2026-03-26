@@ -1,7 +1,5 @@
 # Concurrent Programming — Multithreaded Image Composer & Linked List
 
-**McGill COMP409** — Two concurrency exercises in Java exploring lock design, atomicity, and thread visibility.
-
 > **Skills:** Java · Multithreading · Synchronized blocks · Volatile · ThreadLocalRandom · Race condition analysis · Lock granularity optimization
 
 ---
